@@ -1,0 +1,44 @@
+version: '3'
+services:
+    php-fpm:
+        image: php:drive
+        container_name: php-fpm
+        networks:
+          - web
+        ports:
+          - "9000:9000"
+        volumes:
+          - /etc/arlen-lt.xyz/www:/usr/share/nginx/html
+          - /etc/arlen-lt.xyz/forum:/usr/share/nginx/html/forum
+        stdin_open: true
+        tty: true
+    php-nginx:
+        image: nginx
+        container_name: php-nginx
+        networks:
+          - web
+        ports:
+          - "443:443"
+          - "80:80"
+        volumes:
+          - /etc/arlen-lt.xyz/www:/usr/share/nginx/html
+          - /etc/arlen-lt.xyz/forum:/usr/share/nginx/html/forum
+          - /etc/arlen-lt.xyz/nginx.conf:/etc/nginx/nginx.conf
+          - /etc/arlen-lt.xyz/cert:/etc/nginx/cert
+        depends_on:
+          - php-fpm
+    WPDB:
+        image: mysql
+        container_name: WPDB
+        networks:
+          - web
+        ports:
+          - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: ARLEN1215
+        volumes:
+          - /etc/arlen-lt.xyz/DB:/var/lib/mysql
+        depends_on:
+          - php-fpm
+networks:
+    web:
