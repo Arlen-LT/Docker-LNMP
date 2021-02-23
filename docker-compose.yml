@@ -1,8 +1,8 @@
 version: '3'
 services:
     php-fpm:
-        image: php
-        container_name: php-fpm
+        image: php:drive
+        container_name: $YOUR_CONTAINER_NAME$
         networks:
           - web
         ports:
@@ -14,7 +14,7 @@ services:
         tty: true
     php-nginx:
         image: nginx
-        container_name: php-nginx
+        container_name: $YOUR_CONTAINER_NAME$
         networks:
           - web
         ports:
@@ -23,13 +23,13 @@ services:
         volumes:
           - /etc/$YOUR_DOMAIN_NAME$/www:/usr/share/nginx/html
           - /etc/$YOUR_DOMAIN_NAME$/forum:/usr/share/nginx/html/forum
-          - /etc/$YOUR_DOMAIN_NAME$/nginx.conf:/etc/nginx/nginx.conf
-          - /etc/$YOUR_DOMAIN_NAME$/cert:/etc/nginx/cert
+          - /etc/$YOUR_DOMAIN_NAME$/nginx.conf:/etc/nginx/nginx.conf:ro
+          - /etc/$YOUR_DOMAIN_NAME$/cert:/etc/nginx/cert:ro
         depends_on:
           - php-fpm
-    DB:
+    DataBase:
         image: mysql
-        container_name: DB
+        container_name: $YOUR_CONTAINER_NAME$
         networks:
           - web
         ports:
@@ -40,5 +40,31 @@ services:
           - /etc/$YOUR_DOMAIN_NAME$/DB:/var/lib/mysql
         depends_on:
           - php-fpm
+    mail:
+        image: mail
+        container_name: $YOUR_CONTAINER_NAME$
+        ports:
+          - "25:25"
+          - "465:465"
+          - "110:110"
+          - "143:143"
+          - "993:993"
+          - "995:995"
+        volumes:
+          - /etc/$YOUR_Domain_NAME$/conf/update-exim4.conf.conf:/etc/exim4/update-exim4.conf.conf:ro
+        hostname: mail
+        domainname: $YOUR_Domain_NAME$
+        networks:
+          - web
+    proxy:
+        image: v2ray:4.32.1
+        container_name: $YOUR_CONTAINER_NAME$
+        ports:
+          - "10800:10800"
+        hostname: proxy
+        domainname: $YOUR_Domain_NAME$
+        volumes:
+          - /etc/$YOUR_Domain_NAME$/conf/v2ray.json:/etc/v2ray/config.json:ro
+          - /etc/$YOUR_Domain_NAME$/cert:/etc/v2ray/cert:ro
 networks:
     web:
